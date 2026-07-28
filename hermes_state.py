@@ -380,9 +380,11 @@ def get_last_init_error() -> Optional[str]:
     Slash-command handlers (``/resume``, ``/title``, ``/history``, ``/branch``)
     call this to surface the underlying cause in their error messages when
     ``_session_db is None``.  Returns ``None`` if SessionDB initialized
-    successfully (or hasn't been attempted).
+    successfully (or hasn't been attempted).  Reads use the same lock as
+    writes so the shared value remains safe on free-threaded runtimes.
     """
-    return _last_init_error
+    with _last_init_error_lock:
+        return _last_init_error
 
 
 # Distinctive opening shared by both background-review harness prompts
